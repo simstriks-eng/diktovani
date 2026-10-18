@@ -1,272 +1,239 @@
 <!DOCTYPE html>
-<html lang="cs" class="h-full">
+<html lang="cs">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AudioGemini CZ - Chytrý hlasový zápisník</title>
-  <!-- Tailwind CSS -->
+  <title>Hlasový zápisník AI</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Google Fonts: Inter -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     body {
       font-family: 'Plus Jakarta Sans', sans-serif;
     }
     @keyframes pulse-ring {
       0% { transform: scale(0.95); opacity: 0.8; }
-      50% { transform: scale(1.15); opacity: 0.3; }
+      50% { transform: scale(1.18); opacity: 0.3; }
       100% { transform: scale(0.95); opacity: 0.8; }
     }
-    .pulsing-ring {
+    .pulse-animation {
       animation: pulse-ring 2s infinite ease-in-out;
     }
   </style>
 </head>
-<body class="bg-amber-50/40 text-stone-800 antialiased min-h-full flex flex-col selection:bg-amber-200">
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col justify-between antialiased">
 
-  <!-- Header -->
-  <header class="border-b border-stone-200/70 bg-white/70 backdrop-blur-md sticky top-0 z-30 px-4 py-3.5 sm:px-8 flex justify-between items-center">
-    <div class="flex items-center space-x-2.5">
-      <div class="w-9 h-9 rounded-xl bg-amber-600 flex items-center justify-center text-white shadow-sm font-bold text-lg">
-        🎙️
+  <div class="max-w-2xl mx-auto w-full px-4 py-8 flex-1 flex flex-col">
+    <!-- Hlavička -->
+    <header class="text-center mb-6">
+      <div class="inline-flex items-center gap-2 px-3 py-1 bg-amber-100 text-amber-800 rounded-full text-xs font-semibold uppercase tracking-wider mb-2">
+        Hlasový přepis & zápisník
       </div>
-      <div>
-        <h1 class="font-bold text-base sm:text-lg tracking-tight text-stone-900 leading-none">Hlasový Asistent CZ</h1>
-        <p class="text-xs text-stone-500 mt-0.5">Gemini AI transkripce na jedno kliknutí</p>
-      </div>
-    </div>
-    
-    <div class="flex items-center space-x-2">
-      <button id="toggleSettingsBtn" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-stone-200 bg-white hover:bg-stone-50 text-xs font-medium text-stone-700 shadow-sm transition">
-        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-stone-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-        </svg>
-        <span id="apiKeyStatusLabel">API Klíč</span>
-      </button>
-    </div>
-  </header>
+      <h1 class="text-3xl font-extrabold text-slate-900 tracking-tight">AudioPen AI</h1>
+      <p class="text-slate-500 text-sm mt-1">Diktujte v češtině – Gemini převede řeč na přesný text</p>
+    </header>
 
-  <!-- Nastavení / API Klíč Modal/Drawer -->
-  <section id="settingsPanel" class="hidden border-b border-amber-200 bg-amber-50 px-4 py-4 sm:px-8">
-    <div class="max-w-2xl mx-auto space-y-3">
-      <div class="flex justify-between items-center">
-        <label for="apiKeyInput" class="block text-xs font-semibold uppercase tracking-wider text-stone-700">Google Gemini API Klíč</label>
-        <span class="text-[11px] text-stone-500">Uloženo pouze ve vašem prohlížeči (localStorage)</span>
+    <!-- Sekce API klíče -->
+    <div class="bg-white rounded-2xl shadow-sm border border-slate-200/80 p-4 mb-6 transition-all">
+      <div class="flex items-center justify-between gap-2 mb-2">
+        <label for="apiKeyInput" class="text-xs font-semibold text-slate-600 flex items-center gap-1.5">
+          <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"></path>
+          </svg>
+          Google Gemini API klíč
+        </label>
+        <span id="keyStatus" class="text-xs font-medium text-amber-600">Nenastaveno</span>
       </div>
       <div class="flex gap-2">
-        <input type="password" id="apiKeyInput" placeholder="Vložte AIzaSy..." class="flex-1 px-3.5 py-2 text-sm rounded-lg border border-stone-300 focus:outline-none focus:ring-2 focus:ring-amber-500 bg-white">
-        <button id="saveApiKeyBtn" class="px-4 py-2 bg-stone-900 hover:bg-stone-800 text-white text-xs font-medium rounded-lg transition shadow-sm">Uložit</button>
+        <input 
+          type="password" 
+          id="apiKeyInput" 
+          placeholder="Vložte AIzaSy..." 
+          class="flex-1 text-sm bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 outline-none focus:ring-2 focus:ring-amber-500/30 focus:border-amber-500 font-mono transition"
+        />
+        <button 
+          id="saveKeyBtn" 
+          class="bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold px-4 py-2 rounded-xl transition"
+        >
+          Uložit
+        </button>
       </div>
-      <p class="text-xs text-stone-500">
-        Nemáte klíč? Získejte ho zdarma v <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener" class="text-amber-700 font-medium underline">Google AI Studio</a>.
+      <p class="text-[11px] text-slate-400 mt-2">
+        Klíč se ukládá pouze v prohlížeči. Zdarma ho získáte na <a href="https://aistudio.google.com/" target="_blank" class="underline text-slate-600 hover:text-slate-900">Google AI Studio</a>.
       </p>
     </div>
-  </section>
 
-  <!-- Main Content Container -->
-  <main class="flex-1 max-w-3xl w-full mx-auto px-4 py-8 flex flex-col items-center">
-    
-    <!-- Styl výstupu / Options -->
-    <div class="w-full mb-8 flex flex-col sm:flex-row gap-3 items-center justify-between bg-white p-2.5 rounded-2xl border border-stone-200/80 shadow-sm">
-      <div class="text-xs font-medium text-stone-500 pl-2">Způsob zpracování:</div>
-      <div class="flex items-center gap-1.5 w-full sm:w-auto bg-stone-100 p-1 rounded-xl">
-        <button id="modePolished" class="flex-1 sm:flex-initial px-3.5 py-1.5 text-xs font-semibold rounded-lg bg-white text-stone-900 shadow-sm transition">
-          ✨ Učesaný text (AudioPen)
-        </button>
-        <button id="modeVerbatim" class="flex-1 sm:flex-initial px-3.5 py-1.5 text-xs font-medium rounded-lg text-stone-600 hover:text-stone-900 transition">
-          📝 Přesný doslovný přepis
-        </button>
-      </div>
-    </div>
-
-    <!-- Záznamové centrum -->
-    <div class="flex flex-col items-center justify-center my-4 relative">
-      
-      <!-- Pulzující prstenec při nahrávání -->
-      <div id="recordingRing" class="hidden absolute w-36 h-36 rounded-full bg-red-400/20 pulsing-ring -z-0 pointer-events-none"></div>
-
-      <!-- Tlačítko Nahrávat / Zastavit -->
-      <button id="recordBtn" class="relative z-10 w-28 h-28 rounded-full bg-stone-900 hover:bg-stone-800 text-white flex flex-col items-center justify-center shadow-xl hover:scale-105 active:scale-95 transition-all duration-200">
-        <span id="recordIcon" class="text-3xl mb-1">🎙️</span>
-        <span id="recordBtnText" class="text-[11px] uppercase tracking-wider font-semibold">Nahrávat</span>
+    <!-- Výběr režimu přepisu -->
+    <div class="grid grid-cols-2 gap-3 mb-6">
+      <button 
+        id="modeVerbatim" 
+        class="mode-btn active p-3 rounded-2xl border text-left transition flex flex-col justify-between border-amber-500 bg-amber-50/60 ring-2 ring-amber-500/20"
+      >
+        <span class="text-sm font-bold text-slate-900 flex items-center gap-1.5">
+          ✍️ Doslovný přepis
+        </span>
+        <span class="text-xs text-slate-500 mt-1">
+          Přesný přepis všech vyřčených slov bez úprav a vynechávání.
+        </span>
       </button>
 
-      <!-- Časovač a stav -->
-      <div class="mt-4 flex flex-col items-center">
-        <span id="recordingTimer" class="font-mono text-sm font-semibold text-stone-500">00:00</span>
-        <span id="statusMessage" class="text-xs text-stone-400 mt-1">Klepněte a začněte mluvit česky</span>
-      </div>
-
-      <!-- Zvukové vizuální vlnky (Canvas) -->
-      <canvas id="visualizerCanvas" width="240" height="30" class="mt-3 rounded-full opacity-60"></canvas>
+      <button 
+        id="modeClean" 
+        class="mode-btn p-3 rounded-2xl border border-slate-200 bg-white text-left transition flex flex-col justify-between hover:border-slate-300"
+      >
+        <span class="text-sm font-bold text-slate-900 flex items-center gap-1.5">
+          ✨ Učesaný zápisník
+        </span>
+        <span class="text-xs text-slate-500 mt-1">
+          AudioPen styl: odstraní parazitní slova a zformátuje strukturovaný text.
+        </span>
+      </button>
     </div>
 
-    <!-- Výstupní oblast / Text box -->
-    <div class="w-full mt-6 bg-white rounded-2xl border border-stone-200 shadow-sm flex flex-col overflow-hidden">
-      <!-- Toolbar výstupu -->
-      <div class="px-4 py-3 bg-stone-50/80 border-b border-stone-200/80 flex items-center justify-between">
-        <div class="flex items-center space-x-2">
-          <span class="text-xs font-semibold text-stone-700">Výsledek</span>
-          <span id="modeBadge" class="text-[10px] bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full font-medium">✨ Učesaný text</span>
-        </div>
-        
+    <!-- Hlavní nahrávací tlačítko -->
+    <div class="flex flex-col items-center justify-center my-4">
+      <div class="relative flex items-center justify-center">
+        <div id="recordRing" class="absolute inset-0 rounded-full bg-red-400/30 -m-3 hidden pulse-animation pointer-events-none"></div>
+        <button 
+          id="recordBtn" 
+          class="relative z-10 w-24 h-24 rounded-full flex flex-col items-center justify-center bg-slate-900 hover:bg-slate-800 text-white shadow-xl transition active:scale-95"
+        >
+          <svg id="micIcon" class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"></path>
+          </svg>
+          <svg id="stopIcon" class="w-8 h-8 hidden text-red-500" fill="currentColor" viewBox="0 0 24 24">
+            <rect x="6" y="6" width="12" height="12" rx="2"></rect>
+          </svg>
+        </button>
+      </div>
+
+      <div id="recordingTimer" class="mt-4 text-sm font-mono font-bold text-slate-700 tracking-wider">
+        00:00
+      </div>
+      <div id="statusLabel" class="text-xs text-slate-500 mt-1">
+        Klepnutím zahájíte nahrávání
+      </div>
+    </div>
+
+    <!-- Výsledná oblast -->
+    <div class="mt-6 flex-1 flex flex-col">
+      <div class="flex items-center justify-between mb-2">
+        <h2 class="text-xs font-bold uppercase tracking-wider text-slate-500">Výsledek</h2>
         <div class="flex items-center gap-2">
-          <span id="statsLabel" class="text-[11px] text-stone-400 mr-1">0 slov | 0 znaků</span>
-          <button id="copyBtn" title="Zkopírovat do schránky" class="p-1.5 rounded-lg border border-stone-200 bg-white hover:bg-stone-100 text-stone-600 text-xs transition">
+          <span id="statsLabel" class="text-xs text-slate-400">0 slov | 0 znaků</span>
+          <button 
+            id="copyBtn" 
+            class="text-xs bg-white hover:bg-slate-100 border border-slate-200 px-2.5 py-1 rounded-lg font-medium text-slate-700 transition flex items-center gap-1"
+          >
             📋 Kopírovat
           </button>
-          <button id="clearBtn" title="Vymazat" class="p-1.5 rounded-lg border border-stone-200 bg-white hover:bg-stone-100 text-stone-400 hover:text-red-500 text-xs transition">
+          <button 
+            id="clearBtn" 
+            class="text-xs bg-white hover:bg-rose-50 border border-slate-200 hover:border-rose-200 px-2.5 py-1 rounded-lg font-medium text-slate-500 hover:text-rose-600 transition"
+          >
             ✕ Smazat
           </button>
         </div>
       </div>
 
-      <!-- TextArea -->
-      <div class="relative p-4 sm:p-6 min-h-[180px]">
-        <textarea id="outputText" placeholder="Zde se objeví přesný nebo upravený text z vašeho diktování..." class="w-full min-h-[160px] text-base leading-relaxed text-stone-800 placeholder-stone-300 resize-y border-0 focus:ring-0 focus:outline-none bg-transparent"></textarea>
+      <div 
+        id="resultText" 
+        contenteditable="true" 
+        class="w-full flex-1 min-h-[160px] p-4 bg-white border border-slate-200 rounded-2xl shadow-sm text-sm leading-relaxed text-slate-800 outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 whitespace-pre-wrap transition"
+        placeholder="Zde se objeví přesný nebo upravený text z vašeho diktování..."
+      ></div>
 
-        <!-- Loader overlay při zpracování Gemini -->
-        <div id="loadingOverlay" class="hidden absolute inset-0 bg-white/80 backdrop-blur-sm flex flex-col items-center justify-center gap-3">
-          <div class="w-8 h-8 border-3 border-amber-500 border-t-transparent rounded-full animate-spin"></div>
-          <p class="text-xs font-medium text-stone-600 animate-pulse">Gemini analyzuje a přepisuje nahrávku...</p>
-        </div>
+      <!-- Chybová hláška -->
+      <div id="errorAlert" class="mt-3 hidden p-3 rounded-xl bg-rose-50 border border-rose-200 text-xs text-rose-700 leading-relaxed flex items-start gap-2">
+        <span class="text-base leading-none">⚠️</span>
+        <div class="flex-1" id="errorMessage">Chyba</div>
+        <button id="closeErrorBtn" class="text-rose-500 hover:text-rose-800 font-bold ml-1">✕</button>
       </div>
     </div>
+  </div>
 
-    <!-- Chybový alert banner -->
-    <div id="errorBanner" class="hidden mt-4 w-full p-3.5 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs flex items-center justify-between">
-      <div class="flex items-center gap-2">
-        <span>⚠️</span>
-        <span id="errorMessage">Něco se pokazilo.</span>
-      </div>
-      <button onclick="document.getElementById('errorBanner').classList.add('hidden')" class="text-red-400 hover:text-red-700 font-bold ml-2">✕</button>
-    </div>
-
-  </main>
-
-  <!-- Footer -->
-  <footer class="py-4 text-center text-xs text-stone-400">
-    Běží přímo v prohlížeči • Využívá přímé zpracování audia modelem Gemini
+  <footer class="text-center py-4 text-xs text-slate-400">
+    Běží přímo v prohlížeči • Přímé audio zpracování modelem Gemini
   </footer>
 
-  <!-- Aplikační JavaScript -->
   <script>
-    // --- STAV APLIKACE ---
+    // Konfigurace modelu s podporou audia
+    const GEMINI_MODEL = "gemini-3.8-flash";
+
+    let apiKey = localStorage.getItem("gemini_api_key") || "";
+    let selectedMode = "verbatim"; // 'verbatim' nebo 'clean'
     let mediaRecorder = null;
     let audioChunks = [];
     let isRecording = false;
-    let recordingTimerInterval = null;
+    let timerInterval = null;
     let recordingSeconds = 0;
-    let audioContext = null;
-    let analyser = null;
-    let visualizerAnimId = null;
-    let currentMode = 'polished'; // 'polished' | 'verbatim'
 
-    // --- DOM ELEMENTY ---
-    const recordBtn = document.getElementById('recordBtn');
-    const recordIcon = document.getElementById('recordIcon');
-    const recordBtnText = document.getElementById('recordBtnText');
-    const recordingRing = document.getElementById('recordingRing');
-    const recordingTimer = document.getElementById('recordingTimer');
-    const statusMessage = document.getElementById('statusMessage');
-    const outputText = document.getElementById('outputText');
-    const loadingOverlay = document.getElementById('loadingOverlay');
-    const errorBanner = document.getElementById('errorBanner');
-    const errorMessage = document.getElementById('errorMessage');
-    const copyBtn = document.getElementById('copyBtn');
-    const clearBtn = document.getElementById('clearBtn');
-    const statsLabel = document.getElementById('statsLabel');
-    const modeBadge = document.getElementById('modeBadge');
-    const modePolished = document.getElementById('modePolished');
-    const modeVerbatim = document.getElementById('modeVerbatim');
-    const settingsPanel = document.getElementById('settingsPanel');
-    const toggleSettingsBtn = document.getElementById('toggleSettingsBtn');
-    const apiKeyInput = document.getElementById('apiKeyInput');
-    const saveApiKeyBtn = document.getElementById('saveApiKeyBtn');
-    const apiKeyStatusLabel = document.getElementById('apiKeyStatusLabel');
-    const visualizerCanvas = document.getElementById('visualizerCanvas');
-    const canvasCtx = visualizerCanvas.getContext('2d');
+    // Prvky DOM
+    const apiKeyInput = document.getElementById("apiKeyInput");
+    const saveKeyBtn = document.getElementById("saveKeyBtn");
+    const keyStatus = document.getElementById("keyStatus");
+    const modeVerbatim = document.getElementById("modeVerbatim");
+    const modeClean = document.getElementById("modeClean");
+    const recordBtn = document.getElementById("recordBtn");
+    const micIcon = document.getElementById("micIcon");
+    const stopIcon = document.getElementById("stopIcon");
+    const recordRing = document.getElementById("recordRing");
+    const recordingTimer = document.getElementById("recordingTimer");
+    const statusLabel = document.getElementById("statusLabel");
+    const resultText = document.getElementById("resultText");
+    const statsLabel = document.getElementById("statsLabel");
+    const copyBtn = document.getElementById("copyBtn");
+    const clearBtn = document.getElementById("clearBtn");
+    const errorAlert = document.getElementById("errorAlert");
+    const errorMessage = document.getElementById("errorMessage");
+    const closeErrorBtn = document.getElementById("closeErrorBtn");
 
-    // --- INICIALIZACE A API KLÍČ ---
-    const STORAGE_KEY = 'gemini_audio_api_key';
-    let storedApiKey = localStorage.getItem(STORAGE_KEY) || '';
-    if (storedApiKey) {
-      apiKeyInput.value = storedApiKey;
-      apiKeyStatusLabel.textContent = 'API Klíč (Uložen)';
+    // Inicializace stavu klíče
+    function updateKeyStatus() {
+      if (apiKey) {
+        keyStatus.textContent = "Klíč je uložen ✓";
+        keyStatus.className = "text-xs font-medium text-emerald-600";
+        apiKeyInput.value = apiKey;
+      } else {
+        keyStatus.textContent = "Nenastaveno";
+        keyStatus.className = "text-xs font-medium text-amber-600";
+        apiKeyInput.value = "";
+      }
     }
+    updateKeyStatus();
 
-    toggleSettingsBtn.addEventListener('click', () => {
-      settingsPanel.classList.toggle('hidden');
-    });
-
-    saveApiKeyBtn.addEventListener('click', () => {
+    saveKeyBtn.addEventListener("click", () => {
       const val = apiKeyInput.value.trim();
-      if (val) {
-        localStorage.setItem(STORAGE_KEY, val);
-        storedApiKey = val;
-        apiKeyStatusLabel.textContent = 'API Klíč (Uložen)';
-        settingsPanel.classList.add('hidden');
-        showError(false);
-      } else {
-        localStorage.removeItem(STORAGE_KEY);
-        storedApiKey = '';
-        apiKeyStatusLabel.textContent = 'API Klíč';
+      if (!val) {
+        showError("Zadejte platný Gemini API klíč.");
+        return;
       }
+      apiKey = val;
+      localStorage.setItem("gemini_api_key", apiKey);
+      updateKeyStatus();
+      hideError();
     });
 
-    // --- PŘEPÍNAČ REŽIMŮ (Polished vs Verbatim) ---
-    modePolished.addEventListener('click', () => {
-      currentMode = 'polished';
-      modePolished.className = 'flex-1 sm:flex-initial px-3.5 py-1.5 text-xs font-semibold rounded-lg bg-white text-stone-900 shadow-sm transition';
-      modeVerbatim.className = 'flex-1 sm:flex-initial px-3.5 py-1.5 text-xs font-medium rounded-lg text-stone-600 hover:text-stone-900 transition';
-      modeBadge.textContent = '✨ Učesaný text';
+    // Přepínání režimů
+    modeVerbatim.addEventListener("click", () => {
+      selectedMode = "verbatim";
+      modeVerbatim.classList.add("border-amber-500", "bg-amber-50/60", "ring-2", "ring-amber-500/20");
+      modeVerbatim.classList.remove("border-slate-200", "bg-white");
+      modeClean.classList.remove("border-amber-500", "bg-amber-50/60", "ring-2", "ring-amber-500/20");
+      modeClean.classList.add("border-slate-200", "bg-white");
     });
 
-    modeVerbatim.addEventListener('click', () => {
-      currentMode = 'verbatim';
-      modeVerbatim.className = 'flex-1 sm:flex-initial px-3.5 py-1.5 text-xs font-semibold rounded-lg bg-white text-stone-900 shadow-sm transition';
-      modePolished.className = 'flex-1 sm:flex-initial px-3.5 py-1.5 text-xs font-medium rounded-lg text-stone-600 hover:text-stone-900 transition';
-      modeBadge.textContent = '📝 Doslovný přepis';
+    modeClean.addEventListener("click", () => {
+      selectedMode = "clean";
+      modeClean.classList.add("border-amber-500", "bg-amber-50/60", "ring-2", "ring-amber-500/20");
+      modeClean.classList.remove("border-slate-200", "bg-white");
+      modeVerbatim.classList.remove("border-amber-500", "bg-amber-50/60", "ring-2", "ring-amber-500/20");
+      modeVerbatim.classList.add("border-slate-200", "bg-white");
     });
 
-    // --- POMOCNÉ FUNKCE PRO CHYBY A STATISTIKY ---
-    function showError(show, text = '') {
-      if (show) {
-        errorMessage.textContent = text;
-        errorBanner.classList.remove('hidden');
-      } else {
-        errorBanner.classList.add('hidden');
-      }
-    }
-
-    function updateStats() {
-      const text = outputText.value.trim();
-      const chars = text.length;
-      const words = text ? text.split(/\s+/).length : 0;
-      statsLabel.textContent = `${words} slov | ${chars} znaků`;
-    }
-    outputText.addEventListener('input', updateStats);
-
-    // --- KOPÍROVÁNÍ DO SCHRÁNKY ---
-    copyBtn.addEventListener('click', () => {
-      if (!outputText.value) return;
-      outputText.select();
-      document.execCommand('copy');
-      const originalText = copyBtn.innerHTML;
-      copyBtn.innerHTML = '✓ Zkopírováno!';
-      setTimeout(() => { copyBtn.innerHTML = originalText; }, 2000);
-    });
-
-    clearBtn.addEventListener('click', () => {
-      outputText.value = '';
-      updateStats();
-    });
-
-    // --- NAHRÁVÁNÍ ZVUKU ---
-    recordBtn.addEventListener('click', async () => {
+    // Start / Stop nahrávání
+    recordBtn.addEventListener("click", async () => {
       if (!isRecording) {
         await startRecording();
       } else {
@@ -275,176 +242,118 @@
     });
 
     async function startRecording() {
-      showError(false);
-      audioChunks = [];
+      hideError();
+      if (!apiKey) {
+        showError("Nejprve zadejte a uložte svůj Gemini API klíč výše.");
+        return;
+      }
 
       try {
-        const stream = await navigator.mediaDevices.getUserMedia({
-          audio: {
-            echoCancellation: true,
-            noiseSuppression: true,
-            channelCount: 1
-          }
-        });
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        audioChunks = [];
 
-        // Detekce podporovaného formátu pro Gemini
-        let mimeType = 'audio/webm';
-        if (MediaRecorder.isTypeSupported('audio/webm;codecs=opus')) {
-          mimeType = 'audio/webm;codecs=opus';
-        } else if (MediaRecorder.isTypeSupported('audio/mp4')) {
-          mimeType = 'audio/mp4';
+        // Zjištění podporovaného formátu audio kontejneru v prohlížeči
+        let mimeType = "audio/webm";
+        if (!MediaRecorder.isTypeSupported("audio/webm")) {
+          if (MediaRecorder.isTypeSupported("audio/mp4")) {
+            mimeType = "audio/mp4";
+          } else if (MediaRecorder.isTypeSupported("audio/ogg")) {
+            mimeType = "audio/ogg";
+          } else {
+            mimeType = ""; // fallback na výchozí
+          }
         }
 
-        mediaRecorder = new MediaRecorder(stream, { mimeType });
+        mediaRecorder = mimeType ? new MediaRecorder(stream, { mimeType }) : new MediaRecorder(stream);
 
-        mediaRecorder.ondataavailable = (event) => {
-          if (event.data.size > 0) {
-            audioChunks.push(event.data);
+        mediaRecorder.ondataavailable = (e) => {
+          if (e.data && e.data.size > 0) {
+            audioChunks.push(e.data);
           }
         };
 
         mediaRecorder.onstop = async () => {
-          // Zastavit mikrofon v OS
           stream.getTracks().forEach(track => track.stop());
-          cancelAnimationFrame(visualizerAnimId);
-          clearVisualizer();
-
-          const audioBlob = new Blob(audioChunks, { type: mimeType });
-          await processAudioWithGemini(audioBlob, mimeType);
+          const recordedBlob = new Blob(audioChunks, { type: mediaRecorder.mimeType || "audio/webm" });
+          await processAudioWithGemini(recordedBlob);
         };
 
-        // Spuštění AudioContextu pro jednoduchý vizualizér
-        setupVisualizer(stream);
-
-        mediaRecorder.start(250); // nahrává po blocích
+        mediaRecorder.start(250);
         isRecording = true;
 
-        // UI změny
-        recordBtn.classList.remove('bg-stone-900', 'hover:bg-stone-800');
-        recordBtn.classList.add('bg-red-600', 'hover:bg-red-700');
-        recordIcon.textContent = '⏹';
-        recordBtnText.textContent = 'Zastavit';
-        recordingRing.classList.remove('hidden');
-        statusMessage.textContent = 'Poslouchám... Mluvte zřetelně v češtině.';
-        statusMessage.className = 'text-xs text-red-600 font-medium mt-1';
+        // UI změny pro záznam
+        micIcon.classList.add("hidden");
+        stopIcon.classList.remove("hidden");
+        recordRing.classList.remove("hidden");
+        recordBtn.classList.remove("bg-slate-900", "hover:bg-slate-800");
+        recordBtn.classList.add("bg-red-50", "border-2", "border-red-500");
+        statusLabel.textContent = "Nahrávám... klepnutím ukončíte";
 
-        // Časovač
         recordingSeconds = 0;
         updateTimerDisplay();
-        recordingTimerInterval = setInterval(() => {
+        timerInterval = setInterval(() => {
           recordingSeconds++;
           updateTimerDisplay();
         }, 1000);
 
       } catch (err) {
-        console.error('Chyba mikrofonu:', err);
-        showError(true, 'Nepodařilo se získat přístup k mikrofonu. Povolte prosím mikrofon v prohlížeči.');
+        showError("Nelze získat přístup k mikrofonu: " + err.message);
       }
     }
 
     function stopRecording() {
-      if (!mediaRecorder || mediaRecorder.state === 'inactive') return;
-      mediaRecorder.stop();
-      isRecording = false;
+      if (mediaRecorder && isRecording) {
+        mediaRecorder.stop();
+        isRecording = false;
+        clearInterval(timerInterval);
 
-      clearInterval(recordingTimerInterval);
-
-      // UI reset
-      recordBtn.classList.remove('bg-red-600', 'hover:bg-red-700');
-      recordBtn.classList.add('bg-stone-900', 'hover:bg-stone-800');
-      recordIcon.textContent = '🎙️';
-      recordBtnText.textContent = 'Nahrávat';
-      recordingRing.classList.add('hidden');
-      statusMessage.textContent = 'Nahrávka dokončena. Zpracovávám...';
-      statusMessage.className = 'text-xs text-stone-500 mt-1';
+        // UI změny pro dokončení
+        micIcon.classList.remove("hidden");
+        stopIcon.classList.add("hidden");
+        recordRing.classList.add("hidden");
+        recordBtn.classList.add("bg-slate-900", "hover:bg-slate-800");
+        recordBtn.classList.remove("bg-red-50", "border-2", "border-red-500");
+        statusLabel.textContent = "Odesílám do Gemini a zpracovávám...";
+      }
     }
 
     function updateTimerDisplay() {
-      const mins = Math.floor(recordingSeconds / 60).toString().padStart(2, '0');
-      const secs = (recordingSeconds % 60).toString().padStart(2, '0');
+      const mins = String(Math.floor(recordingSeconds / 60)).padStart(2, "0");
+      const secs = String(recordingSeconds % 60)).padStart(2, "0");
       recordingTimer.textContent = `${mins}:${secs}`;
     }
 
-    // --- JEDNODUCHÝ ZVUKOVÝ VIZUALIZÉR ---
-    function setupVisualizer(stream) {
-      audioContext = new (window.AudioContext || window.webkitAudioContext)();
-      const source = audioContext.createMediaStreamSource(stream);
-      analyser = audioContext.createAnalyser();
-      analyser.fftSize = 64;
-      source.connect(analyser);
-
-      const bufferLength = analyser.frequencyBinCount;
-      const dataArray = new Uint8Array(bufferLength);
-
-      function draw() {
-        visualizerAnimId = requestAnimationFrame(draw);
-        analyser.getByteFrequencyData(dataArray);
-
-        canvasCtx.clearRect(0, 0, visualizerCanvas.width, visualizerCanvas.height);
-        const barWidth = (visualizerCanvas.width / bufferLength) * 1.5;
-        let x = 0;
-
-        for (let i = 0; i < bufferLength; i++) {
-          const barHeight = (dataArray[i] / 255) * visualizerCanvas.height;
-          canvasCtx.fillStyle = '#f59e0b';
-          canvasCtx.fillRect(x, visualizerCanvas.height - barHeight, barWidth - 1, barHeight);
-          x += barWidth;
-        }
-      }
-      draw();
-    }
-
-    function clearVisualizer() {
-      canvasCtx.clearRect(0, 0, visualizerCanvas.width, visualizerCanvas.height);
-    }
-
-    // --- PŘEVOD BLOBU NA BASE64 ---
+    // Převod Blobu do Base64
     function blobToBase64(blob) {
       return new Promise((resolve, reject) => {
         const reader = new FileReader();
         reader.onloadend = () => {
-          // split vyjme 'data:audio/...;base64,' prefix
-          const base64String = reader.result.split(',')[1];
-          resolve(base64String);
+          const base64data = reader.result.split(",")[1];
+          resolve(base64data);
         };
         reader.onerror = reject;
         reader.readAsDataURL(blob);
       });
     }
 
-    // --- ZPRACOVÁNÍ POMOCÍ GEMINI API ---
-    async function processAudioWithGemini(audioBlob, mimeType) {
-      // 1. Kontrola API klíče
-      const keyToUse = storedApiKey || "";
-      if (!keyToUse) {
-        settingsPanel.classList.remove('hidden');
-        apiKeyInput.focus();
-        showError(true, 'Před prvním použitím zadejte svůj Gemini API klíč nahoře v nastavení.');
-        statusMessage.textContent = 'Zadejte API klíč pro pokračování';
-        return;
-      }
-
-      loadingOverlay.classList.remove('hidden');
-      statusMessage.textContent = 'Posílám audio k přepsání do Gemini...';
-
+    // Volání Gemini API
+    async function processAudioWithGemini(blob) {
       try {
-        const base64Audio = await blobToBase64(audioBlob);
+        const base64Audio = await blobToBase64(blob);
+        const mimeType = blob.type.split(";")[0] || "audio/webm";
 
-        // Definice promptu podle zvoleného módu (AudioPen styl vs doslovný)
         let systemInstruction = "";
         let promptText = "";
 
-        if (currentMode === 'polished') {
-          systemInstruction = "Jsi špičkový asistent pro úpravu mluvených poznámek ve stylu aplikace AudioPen. Tvým úkolem je vyslechnout českou nahrávku a převést ji do čistého, přehledného a profesionálně zformulovaného textu. Odstraň veškerá parazitní slova (jako 'éé', 'prostě', 'jakoby', 'vlastně'), oprav přeřeky a logicky zformátuj obsah do odstavců nebo přehledných bodů. Zachovej přesný význam a tón mluvčího.";
-          promptText = "Přepiš a uprav tuto českou nahrávku do krásně strukturované a uhlazené poznámky. Výstup vrať pouze jako hotový text v češtině bez dalších úvodních či závěrečných komentářů.";
+        if (selectedMode === "verbatim") {
+          systemInstruction = "Jsi precizní přepisovatel zvuku do textu. Tvým úkolem je doslovně a přesně přepsat mluvené slovo v češtině. Nic nezkracuj, nic nevymýšlej, neměň styl, nevkládej žádné komentáře navíc.";
+          promptText = "Přepiš přesně a doslovně tento mluvený audio záznam do češtiny:";
         } else {
-          systemInstruction = "Jsi vysoce přesný přepisovatel českého mluveného slova. Prováděj přesný, doslovný přepis toho, co v nahrávce zazní, včetně správné české interpunkce, čárek a diakritiky.";
-          promptText = "Přepiš tuto českou audio nahrávku přesně slovo od slova do textu. Výstup vrať pouze v češtině bez jakýchkoli vlastních komentářů.";
+          systemInstruction = "Jsi inteligentní asistent pro tvorbu poznámek ve stylu AudioPen. Uživatel nahrál mluvený záznam v češtině. Vyčisti text od parazitních slov (např. 'prostě', 'jakoby', 'ehm', opakování), zformátuj myšlenky do jasných, čtivých vět a odrážek. Zachovej všechny důležité myšlenky a tón mluvčího, ale vytvoř přehledný a učesaný výstup.";
+          promptText = "Převeď následující český audio záznam do učesaného zápisníku s jasnou strukturou:";
         }
 
-        // Volání Gemini v1beta REST API s přímým posláním inline audia
-        // Model gemini-2.5-flash je rychlý, moderní a skvěle nativně rozumí českému audiu
-        const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${keyToUse}`;
+        const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${apiKey}`;
 
         const payload = {
           systemInstruction: {
@@ -452,51 +361,96 @@
           },
           contents: [
             {
-              role: 'user',
+              role: "user",
               parts: [
-                { text: promptText },
                 {
                   inlineData: {
-                    mimeType: mimeType.split(';')[0], // např. audio/webm
+                    mimeType: mimeType,
                     data: base64Audio
                   }
+                },
+                {
+                  text: promptText
                 }
               ]
             }
-          ]
+          ],
+          generationConfig: {
+            temperature: 0.2
+          }
         };
 
         const response = await fetch(endpoint, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload)
         });
 
-        if (!response.ok) {
-          const errData = await response.json();
-          throw new Error(errData.error?.message || `Chyba API: ${response.status}`);
-        }
-
         const data = await response.json();
-        const candidateText = data.candidates?.[0]?.content?.parts?.[0]?.text;
 
-        if (candidateText) {
-          outputText.value = candidateText;
-          updateStats();
-          statusMessage.textContent = 'Hotovo! Text je připraven.';
-        } else {
-          showError(true, 'Gemini nevrátil žádný text. Zkuste prosím mluvit hlasitěji nebo déle.');
-          statusMessage.textContent = 'Přepis se nezdařil.';
+        if (!response.ok) {
+          throw new Error(data.error?.message || "Chyba při komunikaci s API.");
         }
+
+        const candidate = data.candidates?.[0];
+        const generatedText = candidate?.content?.parts?.map(p => p.text).join("") || "";
+
+        if (!generatedText.trim()) {
+          resultText.innerText = "(Z nahrávky nebyla detekována žádná řeč.)";
+        } else {
+          resultText.innerText = generatedText.trim();
+        }
+
+        updateStats();
+        statusLabel.textContent = "Klepnutím zahájíte nahrávání";
 
       } catch (err) {
-        console.error('Chyba při komunikaci s Gemini API:', err);
-        showError(true, `Chyba při zpracování: ${err.message}`);
-        statusMessage.textContent = 'Došlo k chybě.';
-      } finally {
-        loadingOverlay.classList.add('hidden');
+        showError("Chyba při zpracování: " + err.message);
+        statusLabel.textContent = "Došlo k chybě.";
       }
     }
+
+    // Statistika slov a znaků
+    function updateStats() {
+      const text = resultText.innerText.trim();
+      const chars = text.length;
+      const words = text ? text.split(/\s+/).filter(Boolean).length : 0;
+      statsLabel.textContent = `${words} slov | ${chars} znaků`;
+    }
+
+    resultText.addEventListener("input", updateStats);
+
+    // Kopírování do schránky
+    copyBtn.addEventListener("click", async () => {
+      const text = resultText.innerText;
+      if (!text) return;
+      try {
+        await navigator.clipboard.writeText(text);
+        const orig = copyBtn.innerText;
+        copyBtn.innerText = "✓ Zkopírováno";
+        setTimeout(() => { copyBtn.innerText = orig; }, 1800);
+      } catch (err) {
+        showError("Kopírování selhalo: " + err.message);
+      }
+    });
+
+    // Smazání textu
+    clearBtn.addEventListener("click", () => {
+      resultText.innerText = "";
+      updateStats();
+    });
+
+    // Zobrazení chyb
+    function showError(msg) {
+      errorMessage.textContent = msg;
+      errorAlert.classList.remove("hidden");
+    }
+
+    function hideError() {
+      errorAlert.classList.add("hidden");
+    }
+
+    closeErrorBtn.addEventListener("click", hideError);
   </script>
 </body>
 </html>
